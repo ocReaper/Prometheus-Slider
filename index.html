@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Prometheus demo page</title>
+	<link rel="stylesheet" type="text/css" href="prometheus.css" media="all"/>
+	<script type="text/javascript" src="jquery-1.9.0.min.js"></script>
+	<script type="text/javascript" src="prometheus.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#slider').Prometheus({
+				stopOnHover: true
+			});
+		});
+	</script>
+</head>
+<body>
+	<div id="slider">
+		<ul>
+			<li>
+				<img src="assets/slide1.jpg" alt=""/>
+			</li>
+			<li>
+				<img src="assets/slide2.jpg" alt=""/>
+			</li>
+		</ul>
+	</div>
+</body>
+</html>

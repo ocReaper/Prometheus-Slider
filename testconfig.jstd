@@ -1,0 +1,5 @@
+load:
+  - /prometheus.js
+
+test:
+  - tests/*.js
