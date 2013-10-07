@@ -1,4 +1,7 @@
 #slider {
+	position: relative;
+	display: block;
+	margin: 0 auto;
 	width: 1000px;
 	height: 270px;
 	overflow: hidden;
@@ -39,8 +42,30 @@
 			}
 		}
 	}
+
+	.direction {
+		@navDestinations: 27px;
+
+		display: block;
+		width: @navDestinations;
+		height: @navDestinations;
+		position: absolute;
+		z-index: 999;
+		cursor: pointer;
+		top: 50%;
+		margin-top: ((@navDestinations / 2) * -1);
+		background: url("assets/bg_direction_nav.png") no-repeat;
+
+		&.next {
+			left: auto;
+			right: 10px;
+			background-position: right top;
+		}
+
+		&.prev {
+			left: 10px;
+			right: auto;
+			background-position: left top;
+		}
+	}
 }
-
-
-
-

@@ -8,7 +8,10 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$('#slider').Prometheus({
-				stopOnHover: true
+				stopOnHover: true,
+				directionNavigation: true,
+				directionNavigationNext: $('#next'),
+				directionNavigationPrev: $('#prev')
 			});
 		});
 	</script>
@@ -23,6 +26,8 @@
 				<img src="assets/slide2.jpg" alt=""/>
 			</li>
 		</ul>
+		<div id="next" class="direction next"></div>
+		<div id="prev" class="direction prev"></div>
 	</div>
 </body>
 </html>
