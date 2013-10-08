@@ -1,6 +1,6 @@
 load:
-  - /prometheus.js
-  - /jquery-1.9.0.min.js
+  - jquery-1.9.0.min.js
+  - prometheus.js
 
 test:
   - tests/*.js
