@@ -18,6 +18,13 @@ $.fn.css3 = function(props) {
 	return this;
 };
 
+/**
+ * This function provides the tile creation and the transition handling as the name says
+ * @param {string} way The way of the transition (= in/out)
+ * @param {Object} settings The animation perferences given by this.settings.animation
+ * @param {string} activeClass The activeClass from this.settings
+ * @param {string} image The url of the image get by jQuery like "url(http://domain.com/assets/slide1.jpg)"
+ */
 $.fn.transition = function(way,settings,activeClass,image) {
 
 	var $container = $(this),
@@ -86,11 +93,14 @@ $.fn.transition = function(way,settings,activeClass,image) {
 					$container.addClass(activeClass);
 					break;
 			}
+		},
+		checkInitialization = function() {
+			if (initialized) {
+				$tiles = $img.find('.tile');
+			} else createTilesByImage();
 		};
 
-	if (initialized) {
-		$tiles = $img.find('.tile');
-	} else createTilesByImage();
+	checkInitialization();
 	doAnimationWithTheCreatedTiles();
 };
 
@@ -99,33 +109,48 @@ Prometheus = function($slider, options) {
 
 	this.$slider = $slider;
 	this.settings = (options != undefined) ? $.extend({}, this.defaults, options) : this.defaults;
+	this.settings.animation = (options.animation != undefined) ? $.extend({}, this.defaults.animation, options.animation) : this.defaults.animation;
 	this.$slides = this.$slider.find(this.settings.slidesSelector);
 	this.sliderLocked = false;
 	this.timer = undefined;
     this.totalImages = (this.$slides.length);
     this.currentPos = 0;
-	this.images = [];
+	this.randomizeTransition = false;
 
 	if (this.$slider.data('initialized')) return;
 	this.$slider.data('initialized', true);
-	this.$slider.find('ul').addClass(this.settings.animation.type);
+
+	this.initializeRandomTransitions();
 
 	this.loadNecessaryPlugins();
-	this.$slides.each(function(){
+	this.turnImagesIntoContainers();
+	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
+};
+
+Prometheus.prototype.initializeRandomTransitions = function() {
+	if (this.settings.animation.type === 'random') {
+		this.$slider.find('ul').addClass(this.transitions[Math.floor((Math.random() * 3))]);
+		this.randomizeTransition = true;
+	}
+};
+
+Prometheus.prototype.turnImagesIntoContainers = function() {
+	var _this = this;
+
+	this.images = [];
+
+	this.$slides.each(function() {
 		var $this = $(this),
 			$img = $this.find('img'),
 			$tiles = $('<div class="tiles"></div>');
 
 		$img.hide();
 		$this.append($tiles);
-		$tiles.css('background-image','url(' + $img.attr('src') + ')');
+		$tiles.css('background-image', 'url(' + $img.attr('src') + ')');
 		_this.images.push($tiles.css('background-image'));
 		$img.remove();
 	});
-	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
 };
-
-//Prometheus.prototype.
 
 Prometheus.prototype.controlNavigation = function() {
 	var _this = this;
@@ -195,12 +220,11 @@ Prometheus.prototype.slide = function(direction, forceSlide) {
 			$currentSlide = this.$slides.eq(this.currentPos),
 			$nextSlide = this.$slides.eq(nextPos);
 
+		if(this.randomizeTransition) {
+			this.$slider.find('ul').removeClass().addClass(this.transitions[Math.floor((Math.random()*3))]);
+		}
 		$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
-		console.log(this.images[this.currentPos]);
 		$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
-
-//		$currentSlide.removeClass(this.settings.activeClass);
-//		$nextSlide.addClass(this.settings.activeClass);
 
 		this.currentPos = nextPos;
 	}
@@ -241,6 +265,13 @@ Prometheus.prototype.modifiers = [
 	'stopOnHover',
 	'directionNavigation',
 	'controlNavigation'
+];
+
+Prometheus.prototype.transitions = [
+	'fade',
+	'slide',
+	'blocks',
+	'blocksZoom'
 ];
 
 $.fn.Prometheus = function(options) {
