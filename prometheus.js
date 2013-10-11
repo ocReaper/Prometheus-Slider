@@ -1,3 +1,99 @@
+/**
+ * Helper function for cross-browser CSS3 support, prepends all possible prefixes to all properties passed in
+ * @param {Object} props Key/value pairs of CSS3 properties
+ */
+$.fn.css3 = function(props) {
+	var css = {};
+	var prefixes = ['webkit', 'moz', 'ms', 'o'];
+
+	for(var prop in props)
+	{
+		for(var i=0; i<prefixes.length; i++) {
+			css['-' + prefixes[i] + '-' + prop] = props[prop];
+		}
+		css[prop] = props[prop];
+	}
+
+	this.css(css);
+	return this;
+};
+
+$.fn.transition = function(way,settings,activeClass,image) {
+
+	var $container = $(this),
+		width = $container.width(),
+		height = $container.height(),
+		$img = $container.find('.tiles'),
+		initialized = !!($img.find('.tile').length > 0),
+		imageBackground = (initialized ? image : $img.css('background-image')),
+		n_tiles = settings.cols * settings.rows,
+		tiles = [],
+		$tiles,
+		range = function ( min, max, rand ) {
+			var arr = ( new Array( ++max - min ) )
+				.join('.').split('.')
+				.map(function( v,i ){ return min + i });
+			return rand
+				? arr.map(function( v ) { return [ Math.random(), v ] })
+					.sort().map(function( v ) { return v[ 1 ] })
+				: arr;
+		},
+		createTilesByImage = function() {
+			for (var i = 0; i < n_tiles; i++) {
+				tiles.push('<div class="tile"></div>');
+			}
+			$tiles = $(tiles.join(''));
+			$img.append($tiles);
+			$tiles.css({
+				width: width / settings.cols,
+				height: height / settings.rows,
+				backgroundImage: imageBackground
+			}).css3({
+				transition : 'none'
+			});
+			$tiles.each(function() {
+				var pos = $(this).position();
+				$(this).css('backgroundPosition', -pos.left + 'px ' + -pos.top + 'px').css3({
+					'transition-property' : 'all',
+					'transition-duration' : '.3s',
+					'transition-timing-function' : 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
+				});
+			});
+		},
+		doAnimationWithTheCreatedTiles = function() {
+			var tilesArr = range(0, n_tiles, settings.random),
+				tileSpeed = settings.speed / n_tiles,
+				animateTilesWithDelay = function() {
+					tilesArr.forEach(function(tile, i) {
+						$tiles.eq(tile).css3({'transition-delay':((i*tileSpeed)/1000)+'s'});
+					});
+				};
+
+			switch (way) {
+				case 'out':
+					$tiles.css3({transition:'none'});
+					$container.removeClass(activeClass);
+					$img.css('background-image',imageBackground);
+				break;
+				case 'in':
+					$img.css('background-image','');
+					$tiles.css3({
+						'transition-property' : 'all',
+						'transition-duration' : '.3s',
+						'transition-timing-function' : 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
+					});
+					animateTilesWithDelay();
+					$container.addClass(activeClass);
+					break;
+			}
+		};
+
+	if (initialized) {
+		$tiles = $img.find('.tile');
+	} else createTilesByImage();
+	doAnimationWithTheCreatedTiles();
+};
+
 Prometheus = function($slider, options) {
 	var _this = this;
 
@@ -8,11 +104,24 @@ Prometheus = function($slider, options) {
 	this.timer = undefined;
     this.totalImages = (this.$slides.length);
     this.currentPos = 0;
+	this.images = [];
 
 	if (this.$slider.data('initialized')) return;
 	this.$slider.data('initialized', true);
+	this.$slider.find('ul').addClass(this.settings.animation.type);
 
 	this.loadNecessaryPlugins();
+	this.$slides.each(function(){
+		var $this = $(this),
+			$img = $this.find('img'),
+			$tiles = $('<div class="tiles"></div>');
+
+		$img.hide();
+		$this.append($tiles);
+		$tiles.css('background-image','url(' + $img.attr('src') + ')');
+		_this.images.push($tiles.css('background-image'));
+		$img.remove();
+	});
 	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
 };
 
@@ -82,16 +191,24 @@ Prometheus.prototype.slide = function(direction, forceSlide) {
 	var _this = this;
 
 	if (!this.sliderLocked || forceSlide) {
-		var nextPos = this.getNextIndex(direction);
+		var nextPos = this.getNextIndex(direction),
+			$currentSlide = this.$slides.eq(this.currentPos),
+			$nextSlide = this.$slides.eq(nextPos);
 
-		this.$slides.eq(this.currentPos).removeClass(this.settings.activeClass);
-		this.$slides.eq(nextPos).addClass(this.settings.activeClass);
+		$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
+		console.log(this.images[this.currentPos]);
+		$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
+
+//		$currentSlide.removeClass(this.settings.activeClass);
+//		$nextSlide.addClass(this.settings.activeClass);
 
 		this.currentPos = nextPos;
 	}
 
-	if (this.timer) clearTimeout(this.timer);
-    this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.duration);
+	if (this.settings.autoSlide) {
+		if (this.timer) clearTimeout(this.timer);
+	    this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.duration);
+	}
 };
 
 Prometheus.prototype.getNextIndex = function(to) {
@@ -103,9 +220,16 @@ Prometheus.prototype.getNextIndex = function(to) {
 Prometheus.prototype.defaults = {
 	activeClass : 'active',
 	slidesSelector : "li",
-	startDuration : 1000,
-	duration : 1000,
-	animation : 'fade',
+	autoSlide : true,
+	startDuration : 0,
+	duration : 3000,
+	animation : {
+		type : 'fade',
+	    cols : 7,
+	    rows : 2,
+	    random : true,
+		speed : 2000
+	},
 	stopOnHover : false,
 	directionNavigation : false,
 	directionNavigationPrev : '',
