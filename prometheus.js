@@ -127,6 +127,39 @@ Prometheus = function($slider, options) {
 	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
 };
 
+Prometheus.prototype.mouseScrollNavigation = function() {
+	var _this = this,
+		scrollInterspacer,
+		isFirefox = (/Firefox/i.test(navigator.userAgent)),
+		mouseWheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
+
+	this.$slider.unbind(mouseWheelEvent + '.slide').bind(mouseWheelEvent + '.slide', function(e) {
+		var eventHandler = isFirefox ? (e.originalEvent.detail > 0) : (e.originalEvent.wheelDelta < 0);
+
+		scrollInterspacer && clearTimeout(scrollInterspacer);
+        scrollInterspacer = setTimeout(function() {
+			if (eventHandler){
+				_this.slide(1, true);
+			} else {
+				_this.slide(-1, true);
+			}
+        }, 250);
+	});
+};
+
+Prometheus.prototype.keyboardNavigation = function() {
+	var _this = this,
+		keydownInterspacer;
+
+	$(document).unbind('keydown.slide').bind('keydown.slide', function(e) {
+		keydownInterspacer && clearTimeout(keydownInterspacer);
+        keydownInterspacer = setTimeout(function() {
+			if(e.keyCode === _this.settings.keyboardNavigationNext) _this.slide(1, true);
+			if(e.keyCode === _this.settings.keyboardNavigationPrev) _this.slide(-1, true);
+        }, 200);
+	});
+};
+
 Prometheus.prototype.timerBar = function() {
 	this.$slider.append('<div id="timerBar"></div>');
 	this.$timerBar = this.$slider.find('#timerBar');
@@ -275,14 +308,20 @@ Prometheus.prototype.defaults = {
 	directionNavigationPrev : '',
 	directionNavigationNext : '',
 	controlNavigation : false,
-	timerBar : false
+	timerBar : false,
+	keyboardNavigation: false,
+	keyboardNavigationPrev: 37,
+	keyboardNavigationNext: 39,
+	mouseScrollNavigation: false
 };
 
 Prometheus.prototype.modifiers = [
 	'stopOnHover',
 	'directionNavigation',
 	'controlNavigation',
-	'timerBar'
+	'timerBar',
+	'keyboardNavigation',
+	'mouseScrollNavigation'
 ];
 
 Prometheus.prototype.transitions = [
