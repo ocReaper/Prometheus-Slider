@@ -109,7 +109,7 @@ Prometheus = function($slider, options) {
 
 	this.$slider = $slider;
 	this.settings = (options != undefined) ? $.extend({}, this.defaults, options) : this.defaults;
-	this.settings.animation = (options.animation != undefined) ? $.extend({}, this.defaults.animation, options.animation) : this.defaults.animation;
+	this.settings.animation = ((options != undefined) && (options.animation != undefined)) ? $.extend({}, this.defaults.animation, options.animation) : this.defaults.animation;
 	this.$slides = this.$slider.find(this.settings.slidesSelector);
 	this.sliderLocked = false;
 	this.timer = undefined;
@@ -129,7 +129,7 @@ Prometheus = function($slider, options) {
 
 Prometheus.prototype.initializeRandomTransitions = function() {
 	if (this.settings.animation.type === 'random') {
-		this.$slider.find('ul').addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length - 1))]);
+		this.$slider.find('ul').addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length))]);
 		this.randomizeTransition = true;
 	}
 };
@@ -221,7 +221,7 @@ Prometheus.prototype.slide = function(direction, forceSlide) {
 			$nextSlide = this.$slides.eq(nextPos);
 
 		if(this.randomizeTransition) {
-			this.$slider.find('ul').removeClass().addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length - 1))]);
+			this.$slider.find('ul').removeClass().addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length))]);
 		}
 		$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
 		$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
