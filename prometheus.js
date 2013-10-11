@@ -127,6 +127,11 @@ Prometheus = function($slider, options) {
 	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
 };
 
+Prometheus.prototype.timerBar = function() {
+	this.$slider.append('<div id="timerBar"></div>');
+	this.$timerBar = this.$slider.find('#timerBar');
+};
+
 Prometheus.prototype.initializeRandomTransitions = function() {
 	if (this.settings.animation.type === 'random') {
 		this.$slider.find('ul').addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length))]);
@@ -215,6 +220,9 @@ Prometheus.prototype.loadNecessaryPlugins = function() {
 Prometheus.prototype.slide = function(direction, forceSlide) {
 	var _this = this;
 
+	if(this.settings.timerBar) {
+		this.$timerBar.css3({transition:'none'}).width('0%');
+	}
 	if (!this.sliderLocked || forceSlide) {
 		var nextPos = this.getNextIndex(direction),
 			$currentSlide = this.$slides.eq(this.currentPos),
@@ -225,6 +233,14 @@ Prometheus.prototype.slide = function(direction, forceSlide) {
 		}
 		$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
 		$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
+
+		if(this.settings.timerBar) {
+			this.$timerBar.css3({
+				'transition-property' : 'width',
+				'transition-duration' : (this.settings.duration / 1000) + 's',
+				'transition-timing-function' : 'linear'
+			}).width('100%');
+		}
 
 		this.currentPos = nextPos;
 	}
@@ -258,20 +274,23 @@ Prometheus.prototype.defaults = {
 	directionNavigation : false,
 	directionNavigationPrev : '',
 	directionNavigationNext : '',
-	controlNavigation : false
+	controlNavigation : false,
+	timerBar : false
 };
 
 Prometheus.prototype.modifiers = [
 	'stopOnHover',
 	'directionNavigation',
-	'controlNavigation'
+	'controlNavigation',
+	'timerBar'
 ];
 
 Prometheus.prototype.transitions = [
 	'fade',
 	'slide',
 	'blocks',
-	'blocksZoom'
+	'blocksZoom',
+	'dots'
 ];
 
 $.fn.Prometheus = function(options) {
