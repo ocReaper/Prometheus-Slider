@@ -129,7 +129,7 @@ Prometheus = function($slider, options) {
 
 Prometheus.prototype.initializeRandomTransitions = function() {
 	if (this.settings.animation.type === 'random') {
-		this.$slider.find('ul').addClass(this.transitions[Math.floor((Math.random() * 3))]);
+		this.$slider.find('ul').addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length - 1))]);
 		this.randomizeTransition = true;
 	}
 };
@@ -221,7 +221,7 @@ Prometheus.prototype.slide = function(direction, forceSlide) {
 			$nextSlide = this.$slides.eq(nextPos);
 
 		if(this.randomizeTransition) {
-			this.$slider.find('ul').removeClass().addClass(this.transitions[Math.floor((Math.random()*3))]);
+			this.$slider.find('ul').removeClass().addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length - 1))]);
 		}
 		$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
 		$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
