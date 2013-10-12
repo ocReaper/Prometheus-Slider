@@ -1,21 +1,91 @@
 /**
  * Helper function for cross-browser CSS3 support, prepends all possible prefixes to all properties passed in
- * @param {Object} props Key/value pairs of CSS3 properties
+ * @param {Object} properties Key/value pairs of CSS3 properties
  */
-$.fn.css3 = function(props) {
+$.fn.css3 = function(properties) {
 	var css = {};
 	var prefixes = ['webkit', 'moz', 'ms', 'o'];
 
-	for(var prop in props)
+	for(var property in properties)
 	{
 		for(var i=0; i<prefixes.length; i++) {
-			css['-' + prefixes[i] + '-' + prop] = props[prop];
+			css['-' + prefixes[i] + '-' + property] = properties[property];
 		}
-		css[prop] = props[prop];
+		css[property] = properties[property];
 	}
 
 	this.css(css);
 	return this;
+};
+
+TouchHandler = function(element, callbacks) {
+	var _this = this,
+		touchstartInterspacer,
+		touchmoveInterspacer;
+	this.el = element;
+	this.cbs = callbacks;
+	this.points = [0, 0];
+        
+	this.el.addEventListener('touchstart', function(e) {
+		touchstartInterspacer && clearTimeout(touchstartInterspacer);
+	    touchstartInterspacer = setTimeout(function() {
+			_this.start(e);
+        }, 200);
+	});
+	
+	this.el.addEventListener('touchmove', function(e) {
+		touchmoveInterspacer && clearTimeout(touchmoveInterspacer);
+        touchmoveInterspacer = setTimeout(function() {
+			e.preventDefault();
+			_this.move(e);
+		}, 200);
+	});
+};
+
+TouchHandler.prototype.start = function (e) {
+	if (e.targetTouches && e.targetTouches.length === 1) {
+		if (e.targetTouches[0].offsetX) {
+			this.points[0] = e.targetTouches[0].offsetX;
+		} else if (e.targetTouches[0].layerX) {
+			this.points[0] = e.targetTouches[0].layerX;
+		} else {
+			this.points[0] = e.targetTouches[0].pageX;
+		}
+		this.points[1] = this.points[0];
+	}
+};
+
+TouchHandler.prototype.diff = function() {
+	return this.points[1] - this.points[0];
+};
+
+TouchHandler.prototype.move = function(e) {
+	if (e.targetTouches && e.targetTouches.length === 1) {
+		if (e.targetTouches[0].offsetX) {
+			this.points[1] = e.targetTouches[0].offsetX;
+		} else if (e.targetTouches[0].layerX) {
+			this.points[1] = e.targetTouches[0].layerX;
+		} else {
+			this.points[1] = e.targetTouches[0].pageX;
+		}
+		this.cbs.swiping(this.diff());
+		this.points[0] = this.points[1];
+	}
+};
+
+$.fn.touchHandler = function(callbacks) {
+	if (typeof callbacks.swiping !== 'function') {
+		throw '"swiping" callback must be defined.';
+	}
+
+	return this.each(function() {
+		var _this = $(this),
+			touchHandler = _this.data('touchHandler');
+
+		if (!touchHandler) {
+			_this.data('touchHandler', (touchHandler = new TouchHandler(this, callbacks)));
+		}
+	});
 };
 
 /**
@@ -125,6 +195,25 @@ Prometheus = function($slider, options) {
 	this.loadNecessaryPlugins();
 	this.turnImagesIntoContainers();
 	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
+};
+
+Prometheus.prototype.touchNavigation = function() {
+	var _this = this,
+		defposition = (this.$slider.width() / 2),
+		currPos = defposition,
+		cb = {
+			swiping: function(displacement) {
+				currPos += displacement;
+				if (currPos > (defposition)) {
+					_this.slide(-1,true);
+				} else if (currPos < defposition) {
+					_this.slide(1,true);
+				}
+				currPos = defposition;
+			}
+		};
+
+	this.$slider.touchHandler(cb);
 };
 
 Prometheus.prototype.mouseScrollNavigation = function() {
@@ -309,10 +398,11 @@ Prometheus.prototype.defaults = {
 	directionNavigationNext : '',
 	controlNavigation : false,
 	timerBar : false,
-	keyboardNavigation: false,
-	keyboardNavigationPrev: 37,
-	keyboardNavigationNext: 39,
-	mouseScrollNavigation: false
+	keyboardNavigation : false,
+	keyboardNavigationPrev : 37,
+	keyboardNavigationNext : 39,
+	mouseScrollNavigation : false,
+	touchNavigation : false
 };
 
 Prometheus.prototype.modifiers = [
@@ -321,7 +411,8 @@ Prometheus.prototype.modifiers = [
 	'controlNavigation',
 	'timerBar',
 	'keyboardNavigation',
-	'mouseScrollNavigation'
+	'mouseScrollNavigation',
+	'touchNavigation'
 ];
 
 Prometheus.prototype.transitions = [
