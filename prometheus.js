@@ -174,6 +174,12 @@ $.fn.transition = function(way,settings,activeClass,image) {
 	doAnimationWithTheCreatedTiles();
 };
 
+/**
+ * Creator of magic, constructor of Prometheus
+ * @param {Object} $slider Requires a jQuery node
+ * @param {Object=} options An optional object of options to override the defaults
+ * @constructor
+ */
 Prometheus = function($slider, options) {
 	var _this = this;
 
@@ -191,12 +197,16 @@ Prometheus = function($slider, options) {
 	this.$slider.data('initialized', true);
 
 	this.initializeRandomTransitions();
-
 	this.loadNecessaryPlugins();
 	this.turnImagesIntoContainers();
+	this.API('').preInit();
+
 	this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
 };
 
+/**
+ * Forces a slide for even the smallest swipe action
+ */
 Prometheus.prototype.touchNavigation = function() {
 	var _this = this,
 		defposition = (this.$slider.width() / 2),
@@ -216,6 +226,9 @@ Prometheus.prototype.touchNavigation = function() {
 	this.$slider.touchHandler(cb);
 };
 
+/**
+ * Listens to mouseWheel event and triggers slide adjusted to the event
+ */
 Prometheus.prototype.mouseScrollNavigation = function() {
 	var _this = this,
 		scrollInterspacer,
@@ -236,6 +249,9 @@ Prometheus.prototype.mouseScrollNavigation = function() {
 	});
 };
 
+/**
+ * Listens to keydown event and if the pressed key is the controll key it forces a slide
+ */
 Prometheus.prototype.keyboardNavigation = function() {
 	var _this = this,
 		keydownInterspacer;
@@ -249,18 +265,56 @@ Prometheus.prototype.keyboardNavigation = function() {
 	});
 };
 
+/**
+ * Attaches a timer bar to the slider
+ */
 Prometheus.prototype.timerBar = function() {
+	var _this = this,
+		resetBar = function() {
+			if(_this.settings.timerBar) {
+				_this.$timerBar.css3({transition:'none'}).width('0%');
+			}
+		},
+		animateBar = function() {
+			if(_this.settings.timerBar) {
+				_this.$timerBar.css3({
+					'transition-property' : 'width',
+					'transition-duration' : (_this.settings.duration / 1000) + 's',
+					'transition-timing-function' : 'linear'
+				}).width('100%');
+			}
+		};
+
 	this.$slider.append('<div id="timerBar"></div>');
 	this.$timerBar = this.$slider.find('#timerBar');
+
+	this.API('beforeSlide').addFunction(resetBar);
+	this.API('afterSlide').addFunction(animateBar);
 };
 
+/**
+ * Creates random transitions
+ */
 Prometheus.prototype.initializeRandomTransitions = function() {
+	var _this = this;
+	
 	if (this.settings.animation.type === 'random') {
 		this.$slider.find('ul').addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length))]);
 		this.randomizeTransition = true;
 	}
+	
+	this.API('beforeTransition').addFunction(
+		function() {
+			if(_this.randomizeTransition) {
+				_this.$slider.find('ul').removeClass().addClass(_this.transitions[Math.floor(Math.random() * (_this.transitions.length))]);
+			}
+		}
+	);
 };
 
+/**
+ * Replaces every <img/> tag to a <div/> with a background image
+ */
 Prometheus.prototype.turnImagesIntoContainers = function() {
 	var _this = this;
 
@@ -279,34 +333,33 @@ Prometheus.prototype.turnImagesIntoContainers = function() {
 	});
 };
 
+/**
+ * Initializes a controll navigation
+ */
 Prometheus.prototype.controlNavigation = function() {
-	var _this = this;
-
-	_this.$slider.append('<ul id="pagination"></ul>');
-	for(var i=0;i<_this.totalImages;i++)
-		$('#pagination').append('<li><span>&nbsp;</span></li>');
-
-	Prometheus.prototype.slide = function(direction, forceSlide) {
-		var _this = this;
-
-		if (!_this.sliderLocked || forceSlide) {
-			var nextPos = _this.getNextIndex(direction),
-				$paginationPage = $('#pagination').find('li');
-
-			_this.$slides.eq(_this.currentPos).removeClass(_this.settings.activeClass);
-			_this.$slides.eq(nextPos).addClass(_this.settings.activeClass);
+	var _this = this,
+		createPaginationContainer = function() {
+			_this.$slider.append('<ul id="pagination"></ul>');
+		},
+		createBulletsForPagination = function() {
+			for (var i = 0; i < _this.totalImages; i++)
+				$('#pagination').append('<li><span>&nbsp;</span></li>');
+		},
+		animatePaginationBullets = function(nextPos) {
+			var $paginationPage = $('#pagination').find('li');
 
 			$paginationPage.eq(_this.currentPos).removeClass(_this.settings.activeClass);
 			$paginationPage.eq(nextPos).addClass(_this.settings.activeClass);
+		};
 
-			_this.currentPos = nextPos;
-		}
-
-		if (_this.timer) clearTimeout(_this.timer);
-	    _this.timer = setTimeout(function(){ _this.slide(1); }, _this.settings.duration);
-	};
+	createPaginationContainer();
+	createBulletsForPagination();
+	this.API('afterTransition').addFunction(animatePaginationBullets);
 };
 
+/**
+ * Listens to the clicking event of the directionNavigation buttons
+ */
 Prometheus.prototype.directionNavigation = function() {
 	var _this = this;
 	
@@ -318,6 +371,9 @@ Prometheus.prototype.directionNavigation = function() {
 	});
 };
 
+/**
+ * Prevents autoSliding on hover
+ */
 Prometheus.prototype.stopOnHover = function() {
 	var _this = this;
 	
@@ -329,6 +385,9 @@ Prometheus.prototype.stopOnHover = function() {
 	});
 };
 
+/**
+ * Calls all the functions which are activated in the settings
+ */
 Prometheus.prototype.loadNecessaryPlugins = function() {
 	var i = 0;
 	while (i < this.modifiers.length) {
@@ -339,46 +398,140 @@ Prometheus.prototype.loadNecessaryPlugins = function() {
 	}
 };
 
-Prometheus.prototype.slide = function(direction, forceSlide) {
-	var _this = this;
+Prometheus.prototype.beforeSlideFunctions = [];
+Prometheus.prototype.beforeTransitionFunctions = [];
+Prometheus.prototype.afterTransitionFunctions = [];
+Prometheus.prototype.afterSlideFunctions = [];
 
-	if(this.settings.timerBar) {
-		this.$timerBar.css3({transition:'none'}).width('0%');
+/**
+ * This is the API for the key points of sliding method
+ * @param {string} type Declares the used API part
+ * @returns {Object} Returns itself so you can chain the methods
+ * @constructor
+ */
+Prometheus.prototype.API = function(type) {
+    var _this = this,
+	    publicSymbols = {},
+	    context;
+
+	switch (type) {
+		case 'beforeSlide':
+			context = _this.beforeSlideFunctions;
+		break;
+		case 'beforeTransition':
+			context = _this.beforeTransitionFunctions;
+		break;
+		case 'afterTransition':
+			context = _this.afterTransitionFunctions;
+		break;
+		case 'afterSlide':
+			context = _this.afterSlideFunctions;
+		break;
 	}
+
+	/**
+	 * Drops everything you declared in the options into its context specific array
+	 */
+	publicSymbols.preInit = function() {
+		var __this = this;
+
+		$.each(_this.settings.beforeSlide,function(){
+			context = _this.beforeSlideFunctions;
+			__this.addFunction(this);
+		});
+		$.each(_this.settings.beforeTransition,function(){
+			context = _this.beforeTransitionFunctions;
+			__this.addFunction(this);
+		});
+		$.each(_this.settings.afterTransition,function(){
+			context = _this.afterTransitionFunctions;
+			__this.addFunction(this);
+		});
+		$.each(_this.settings.afterSlide,function(){
+			context = _this.afterSlideFunctions;
+			__this.addFunction(this);
+		});
+	};
+
+	/**
+	 * Calls the functions from the context specific array
+	 */
+    publicSymbols.init = function(nextPos) {
+
+        for (var index = 0; index < context.length; index++) {
+            try {
+	            context[index](nextPos);
+            }
+            catch (e) {
+	            console.error('No such method!');
+            }
+        }
+    };
+
+	/**
+	 * Adds a function to the context specific array
+	 * @param {Function} f The function you want to add
+	 */
+    publicSymbols.addFunction = function(f) {
+        if (context) {
+            context.push(f);
+        }
+        else {
+            setTimeout(f, 0);
+        }
+    };
+
+    return publicSymbols;
+};
+
+/**
+ * Heart of Prometheus
+ * @param {number} direction Represents an index of where we want to go
+ * @param {boolean=} forceSlide Forces to slide, even if the slider is locked
+ */
+Prometheus.prototype.slide = function(direction, forceSlide) {
+	var _this = this,
+		nextPos = this.getNextIndex(direction);
+
+	this.API('beforeSlide').init(nextPos);
+
 	if (!this.sliderLocked || forceSlide) {
-		var nextPos = this.getNextIndex(direction),
-			$currentSlide = this.$slides.eq(this.currentPos),
+		var $currentSlide = this.$slides.eq(this.currentPos),
 			$nextSlide = this.$slides.eq(nextPos);
 
-		if(this.randomizeTransition) {
-			this.$slider.find('ul').removeClass().addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length))]);
-		}
+		this.API('beforeTransition').init(nextPos);
+		
 		$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
 		$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
 
-		if(this.settings.timerBar) {
-			this.$timerBar.css3({
-				'transition-property' : 'width',
-				'transition-duration' : (this.settings.duration / 1000) + 's',
-				'transition-timing-function' : 'linear'
-			}).width('100%');
-		}
+		this.API('afterTransition').init(nextPos);
 
 		this.currentPos = nextPos;
 	}
 
+	this.API('afterSlide').init(nextPos);
+	
 	if (this.settings.autoSlide) {
 		if (this.timer) clearTimeout(this.timer);
 	    this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.duration);
 	}
 };
 
+/**
+ * Counts the next slides number
+ * @param {number} to Represents an index of where we want to go
+ * @returns {number}
+ */
 Prometheus.prototype.getNextIndex = function(to) {
 	if ((this.currentPos + to) >= this.totalImages) return 0;
 	else if ((this.currentPos + to) < 0) return this.totalImages - 1;
 	else return this.currentPos + to;
 };
 
+/**
+ * The default options of Prometheus
+ * @type {{activeClass: string, slidesSelector: string, autoSlide: boolean, startDuration: number, duration: number, animation: {type: string, cols: number, rows: number, random: boolean, speed: number}, stopOnHover: boolean, directionNavigation: boolean, directionNavigationPrev: string, directionNavigationNext: string, controlNavigation: boolean, timerBar: boolean, keyboardNavigation: boolean, keyboardNavigationPrev: number, keyboardNavigationNext: number, mouseScrollNavigation: boolean, touchNavigation: boolean, init: Array, beforeSlide: Array, beforeTransition: Array, afterSlide: Array, afterTransition: Array}}
+ */
 Prometheus.prototype.defaults = {
 	activeClass : 'active',
 	slidesSelector : "li",
@@ -402,9 +555,18 @@ Prometheus.prototype.defaults = {
 	keyboardNavigationPrev : 37,
 	keyboardNavigationNext : 39,
 	mouseScrollNavigation : false,
-	touchNavigation : false
+	touchNavigation : false,
+	init : [],
+	beforeSlide : [],
+	beforeTransition : [],
+	afterSlide : [],
+	afterTransition : []
 };
 
+/**
+ * Array of the functions which can modify the working of Prometheus slider
+ * @type {Array}
+ */
 Prometheus.prototype.modifiers = [
 	'stopOnHover',
 	'directionNavigation',
@@ -415,6 +577,10 @@ Prometheus.prototype.modifiers = [
 	'touchNavigation'
 ];
 
+/**
+ * Array of transitions used by random transition
+ * @type {Array}
+ */
 Prometheus.prototype.transitions = [
 	'fade',
 	'slide',

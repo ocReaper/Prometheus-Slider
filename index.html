@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
 	<title>Prometheus demo page</title>
 	<link rel="stylesheet" type="text/css" href="prometheus.css" media="all"/>
 	<script type="text/javascript" src="jquery-1.9.0.min.js"></script>
@@ -8,7 +9,6 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$('#slider').Prometheus({
-//				autoSlide: false,
 				stopOnHover: true,
 				directionNavigation: true,
 				directionNavigationNext: $('#next'),
@@ -17,12 +17,11 @@
 				mouseScrollNavigation: true,
 				touchNavigation: true,
 				timerBar : true,
+				controlNavigation : true,
 				animation: {
 					cols : 15,
 					rows : 4,
 					type : 'random'
-//					speed : 2000,
-//					random: false
 				}
 			});
 		});
