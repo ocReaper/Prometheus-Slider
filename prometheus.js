@@ -157,7 +157,7 @@ $.fn.transition = function(way,settings,activeClass,image) {
 					$tiles.css3({
 						'transition-property' : 'all',
 						'transition-duration' : '.3s',
-						'transition-timing-function' : 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
+						'transition-timing-function' : 'cubic-bezier(0.390, 0.575, 0.565, 1.000)'
 					});
 					animateTilesWithDelay();
 					$container.addClass(activeClass);
@@ -420,7 +420,8 @@ Prometheus.prototype.transitions = [
 	'slide',
 	'blocks',
 	'blocksZoom',
-	'dots'
+	'dots',
+	'googleNowCards'
 ];
 
 $.fn.Prometheus = function(options) {
