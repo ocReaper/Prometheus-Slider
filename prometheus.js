@@ -209,17 +209,17 @@ Prometheus = function($slider, options) {
  */
 Prometheus.prototype.touchNavigation = function() {
 	var _this = this,
-		defposition = (this.$slider.width() / 2),
-		currPos = defposition,
+		defaultPosition = (this.$slider.width() / 2),
+		currentPosition = defaultPosition,
 		cb = {
 			swiping: function(displacement) {
-				currPos += displacement;
-				if (currPos > (defposition)) {
+				currentPosition += displacement;
+				if (currentPosition > (defaultPosition)) {
 					_this.slide(-1,true);
-				} else if (currPos < defposition) {
+				} else if (currentPosition < defaultPosition) {
 					_this.slide(1,true);
 				}
-				currPos = defposition;
+				currentPosition = defaultPosition;
 			}
 		};
 
@@ -556,11 +556,10 @@ Prometheus.prototype.defaults = {
 	keyboardNavigationNext : 39,
 	mouseScrollNavigation : false,
 	touchNavigation : false,
-	init : [],
 	beforeSlide : [],
 	beforeTransition : [],
-	afterSlide : [],
-	afterTransition : []
+	afterTransition : [],
+	afterSlide : []
 };
 
 /**
