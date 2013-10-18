@@ -117,18 +117,18 @@ The default is `false`.
 Defines whether the slider can be controlled by touch events or not.
 The default is `false`.
 
-### beforeSlide *{array of anonymous functions}*
-You can add `anonymous functions` here which will be triggered before the slide event.
+### beforeSlide *{anonymous function or array of anonymous functions}*
+You can add an `anonymous function` or an array of `anonymous functions` here which will be triggered before the slide event.
 The default is `[]`.
 
-### beforeTransition *{array of anonymous functions}*
-You can add `anonymous functions` here which will be triggered before the transition.
+### beforeTransition *{anonymous function or array of anonymous functions}*
+You can add an `anonymous function` or an array of `anonymous functions` here which will be triggered before the transition.
 The default is `[]`.
 
-### afterTransition *{array of anonymous functions}*
-You can add `anonymous functions` here which will be triggered after the transition.
+### afterTransition *{anonymous function or array of anonymous functions}*
+You can add an `anonymous function` or an array of `anonymous functions` here which will be triggered after the transition.
 The default is `[]`.
 
-### afterSlide *{array of anonymous functions}*
-You can add `anonymous functions` here which will be triggered after the slide event.
+### afterSlide *{anonymous function or array of anonymous functions}*
+You can add an `anonymous function` or an array of `anonymous functions` here which will be triggered after the slide event.
 The default is `[]`.
