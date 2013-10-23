@@ -271,98 +271,6 @@ Prometheus.prototype.initScriptsFromSettings = function() {
 };
 
 /**
- * Forces a slide for even the smallest swipe action
- */
-touchNavigation = function(Prometheus) {
-	var _this = Prometheus,
-		defaultPosition = (Prometheus.$slider.width() / 2),
-		currentPosition = defaultPosition,
-		cb = {
-			swiping: function(displacement) {
-				currentPosition += displacement;
-				if (currentPosition > (defaultPosition)) {
-					_this.slide(-1,true);
-				} else if (currentPosition < defaultPosition) {
-					_this.slide(1,true);
-				}
-				currentPosition = defaultPosition;
-			}
-		};
-
-	Prometheus.$slider.touchHandler(cb);
-};
-
-/**
- * Listens to mouseWheel event and triggers slide adjusted to the event
- */
-mouseScrollNavigation = function(Prometheus) {
-	var _this = Prometheus,
-		scrollInterspacer,
-		isFirefox = (/Firefox/i.test(navigator.userAgent)),
-		mouseWheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
-
-	Prometheus.$slider.unbind(mouseWheelEvent + '.slide').bind(mouseWheelEvent + '.slide', function(e) {
-		var eventHandler = isFirefox ? (e.originalEvent.detail > 0) : (e.originalEvent.wheelDelta < 0);
-
-		scrollInterspacer && clearTimeout(scrollInterspacer);
-        scrollInterspacer = setTimeout(function() {
-			if (eventHandler){
-				_this.slide(1, true);
-			} else {
-				_this.slide(-1, true);
-			}
-        }, 250);
-	});
-};
-
-/**
- * Listens to keydown event and if the pressed key is the controll key it forces a slide
- */
-keyboardNavigation = function(Prometheus) {
-	var _this = Prometheus,
-		keydownInterspacer;
-
-	$(document).unbind('keydown.slide').bind('keydown.slide', function(e) {
-		keydownInterspacer && clearTimeout(keydownInterspacer);
-        keydownInterspacer = setTimeout(function() {
-			if(e.keyCode === _this.settings.keyboardNavigationNext) _this.slide(1, true);
-			if(e.keyCode === _this.settings.keyboardNavigationPrev) _this.slide(-1, true);
-        }, 200);
-	});
-};
-
-/**
- * Attaches a timer bar to the slider
- */
-timerBar = function(Prometheus) {
-	var _this = Prometheus,
-		resetBar = function() {
-			return function() {
-				if(_this.settings.timerBar) {
-					_this.$timerBar.css3({transition:'none'}).width('0%');
-				}
-			}
-		},
-		animateBar = function() {
-			return function() {
-				if(_this.settings.timerBar) {
-					_this.$timerBar.css3({
-						'transition-property' : 'width',
-						'transition-duration' : (_this.settings.duration / 1000) + 's',
-						'transition-timing-function' : 'linear'
-					}).width('100%');
-				}
-			}
-		};
-
-	Prometheus.$slider.append('<div id="timerBar"></div>');
-	Prometheus.$timerBar = Prometheus.$slider.find('#timerBar');
-
-	$.subscribe('beforeSlide', resetBar());
-	$.subscribe('afterSlide', animateBar());
-};
-
-/**
  * Creates random transitions
  */
 Prometheus.prototype.initializeRandomTransitions = function() {
@@ -398,60 +306,6 @@ Prometheus.prototype.turnImagesIntoContainers = function() {
 		$tiles.css('background-image', 'url(' + $img.attr('src') + ')');
 		_this.images.push($tiles.css('background-image'));
 		$img.remove();
-	});
-};
-
-/**
- * Initializes a controll navigation
- */
-controlNavigation = function(Prometheus) {
-	var _this = Prometheus,
-		createPaginationContainer = function() {
-			_this.$slider.append('<ul id="pagination"></ul>');
-		},
-		createBulletsForPagination = function() {
-			for (var i = 0; i < _this.totalImages; i++)
-				$('#pagination').append('<li><span>&nbsp;</span></li>');
-		},
-		animatePaginationBullets = function() {
-			return function(e,nextPos) {
-				var $paginationPage = $('#pagination').find('li');
-
-				$paginationPage.eq(_this.currentPos).removeClass(_this.settings.activeClass);
-				$paginationPage.eq(nextPos).addClass(_this.settings.activeClass);
-			}
-		};
-
-	createPaginationContainer();
-	createBulletsForPagination();
-	$.subscribe('afterTransition', animatePaginationBullets());
-};
-
-/**
- * Listens to the clicking event of the directionNavigation buttons
- */
-directionNavigation = function(Prometheus) {
-	var _this = Prometheus;
-	
-	Prometheus.settings.directionNavigationNext.unbind('click.slide').bind('click.slide', function() {
-		_this.slide(1, true);
-	});
-	Prometheus.settings.directionNavigationPrev.unbind('click.slide').bind('click.slide', function() {
-		_this.slide(-1, true);
-	});
-};
-
-/**
- * Prevents autoSliding on hover
- */
-stopOnHover = function(Prometheus) {
-	var _this = Prometheus;
-	
-	Prometheus.$slider.unbind('mouseenter.lockSlide').bind('mouseenter.lockSlide', function() {
-		_this.sliderLocked = true;
-	});
-	Prometheus.$slider.unbind('mouseleave.lockSlide').bind('mouseleave.lockSlide', function() {
-		_this.sliderLocked = false;
 	});
 };
 
@@ -572,4 +426,150 @@ $.fn.Prometheus = function(options) {
 			loadNecessaryPlugins();
 		}
 	);
+};
+
+/**
+ * Forces a slide for even the smallest swipe action
+ */
+touchNavigation = function(Prometheus) {
+	var _this = Prometheus,
+		defaultPosition = (Prometheus.$slider.width() / 2),
+		currentPosition = defaultPosition,
+		cb = {
+			swiping: function(displacement) {
+				currentPosition += displacement;
+				if (currentPosition > (defaultPosition)) {
+					_this.slide(-1,true);
+				} else if (currentPosition < defaultPosition) {
+					_this.slide(1,true);
+				}
+				currentPosition = defaultPosition;
+			}
+		};
+
+	Prometheus.$slider.touchHandler(cb);
+};
+
+/**
+ * Listens to mouseWheel event and triggers slide adjusted to the event
+ */
+mouseScrollNavigation = function(Prometheus) {
+	var _this = Prometheus,
+		scrollInterspacer,
+		isFirefox = (/Firefox/i.test(navigator.userAgent)),
+		mouseWheelEvent = isFirefox ? "DOMMouseScroll" : "mousewheel";
+
+	Prometheus.$slider.unbind(mouseWheelEvent + '.slide').bind(mouseWheelEvent + '.slide', function(e) {
+		var eventHandler = isFirefox ? (e.originalEvent.detail > 0) : (e.originalEvent.wheelDelta < 0);
+
+		scrollInterspacer && clearTimeout(scrollInterspacer);
+        scrollInterspacer = setTimeout(function() {
+			if (eventHandler){
+				_this.slide(1, true);
+			} else {
+				_this.slide(-1, true);
+			}
+        }, 250);
+	});
+};
+
+/**
+ * Listens to keydown event and if the pressed key is the controll key it forces a slide
+ */
+keyboardNavigation = function(Prometheus) {
+	var _this = Prometheus,
+		keydownInterspacer;
+
+	$(document).unbind('keydown.slide').bind('keydown.slide', function(e) {
+		keydownInterspacer && clearTimeout(keydownInterspacer);
+        keydownInterspacer = setTimeout(function() {
+			if(e.keyCode === _this.settings.keyboardNavigationNext) _this.slide(1, true);
+			if(e.keyCode === _this.settings.keyboardNavigationPrev) _this.slide(-1, true);
+        }, 200);
+	});
+};
+
+/**
+ * Attaches a timer bar to the slider
+ */
+timerBar = function(Prometheus) {
+	var _this = Prometheus,
+		resetBar = function() {
+			return function() {
+				if(_this.settings.timerBar) {
+					_this.$timerBar.css3({transition:'none'}).width('0%');
+				}
+			}
+		},
+		animateBar = function() {
+			return function() {
+				if(_this.settings.timerBar) {
+					_this.$timerBar.css3({
+						'transition-property' : 'width',
+						'transition-duration' : (_this.settings.duration / 1000) + 's',
+						'transition-timing-function' : 'linear'
+					}).width('100%');
+				}
+			}
+		};
+
+	Prometheus.$slider.append('<div id="timerBar"></div>');
+	Prometheus.$timerBar = Prometheus.$slider.find('#timerBar');
+
+	$.subscribe('beforeSlide', resetBar());
+	$.subscribe('afterSlide', animateBar());
+};
+
+/**
+ * Initializes a controll navigation
+ */
+controlNavigation = function(Prometheus) {
+	var _this = Prometheus,
+		createPaginationContainer = function() {
+			_this.$slider.append('<ul id="pagination"></ul>');
+		},
+		createBulletsForPagination = function() {
+			for (var i = 0; i < _this.totalImages; i++)
+				$('#pagination').append('<li><span>&nbsp;</span></li>');
+		},
+		animatePaginationBullets = function() {
+			return function(e,nextPos) {
+				var $paginationPage = $('#pagination').find('li');
+
+				$paginationPage.eq(_this.currentPos).removeClass(_this.settings.activeClass);
+				$paginationPage.eq(nextPos).addClass(_this.settings.activeClass);
+			}
+		};
+
+	createPaginationContainer();
+	createBulletsForPagination();
+	$.subscribe('afterTransition', animatePaginationBullets());
+};
+
+/**
+ * Listens to the clicking event of the directionNavigation buttons
+ */
+directionNavigation = function(Prometheus) {
+	var _this = Prometheus;
+
+	Prometheus.settings.directionNavigationNext.unbind('click.slide').bind('click.slide', function() {
+		_this.slide(1, true);
+	});
+	Prometheus.settings.directionNavigationPrev.unbind('click.slide').bind('click.slide', function() {
+		_this.slide(-1, true);
+	});
+};
+
+/**
+ * Prevents autoSliding on hover
+ */
+stopOnHover = function(Prometheus) {
+	var _this = Prometheus;
+
+	Prometheus.$slider.unbind('mouseenter.lockSlide').bind('mouseenter.lockSlide', function() {
+		_this.sliderLocked = true;
+	});
+	Prometheus.$slider.unbind('mouseleave.lockSlide').bind('mouseleave.lockSlide', function() {
+		_this.sliderLocked = false;
+	});
 };
