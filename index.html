@@ -8,7 +8,22 @@
 	<script type="text/javascript" src="prometheus.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			$('#slider').Prometheus();
+			$('#slider').Prometheus({
+				animation : {
+					type : 'random',
+				    cols : 7,
+				    rows : 2
+				},
+				stopOnHover : true,
+				directionNavigation : true,
+				directionNavigationPrev : $('#prev'),
+				directionNavigationNext : $('#next'),
+				controlNavigation : true,
+				timerBar : true,
+				keyboardNavigation : true,
+				mouseScrollNavigation : true,
+				touchNavigation : true
+			});
 		});
 	</script>
 </head>
