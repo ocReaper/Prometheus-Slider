@@ -214,12 +214,10 @@ Prometheus = function($slider, options) {
 	this.timer = undefined;
     this.totalImages = (this.$slides.length);
     this.currentPos = 0;
-	this.randomizeTransition = false;
 
 	if (this.$slider.data('initialized')) return;
 	this.$slider.data('initialized', true);
 
-	this.initializeRandomTransitions();
 	this.turnImagesIntoContainers();
 	this.initScriptsFromSettings();
 
@@ -244,24 +242,6 @@ Prometheus.prototype.initScriptsFromSettings = function() {
 				});
 			}
 		});
-	});
-};
-
-/**
- * Creates random transitions
- */
-Prometheus.prototype.initializeRandomTransitions = function() {
-	var _this = this;
-	
-	if (this.settings.animation.type === 'random') {
-		this.$slider.find('ul').addClass(this.transitions[Math.floor(Math.random() * (this.transitions.length))]);
-		this.randomizeTransition = true;
-	}
-
-	$.subscribe('beforeTransition', function() {
-		if(_this.randomizeTransition) {
-			_this.$slider.find('ul').removeClass().addClass(_this.transitions[Math.floor(Math.random() * (_this.transitions.length))]);
-		}
 	});
 };
 
@@ -400,9 +380,28 @@ $.fn.Prometheus = function(options) {
 			],
 			p = new Prometheus($(this),options);
 
+			initializeRandomTransitions(p);
 			loadNecessaryPlugins();
 		}
 	);
+};
+
+/**
+ * Creates random transitions
+ */
+initializeRandomTransitions = function(Prometheus) {
+	Prometheus.randomizeTransition = false;
+
+	if (Prometheus.settings.animation.type === 'random') {
+		Prometheus.$slider.find('ul').addClass(Prometheus.transitions[Math.floor(Math.random() * (Prometheus.transitions.length))]);
+		Prometheus.randomizeTransition = true;
+	}
+
+	$.subscribe('beforeTransition', function() {
+		if(Prometheus.randomizeTransition) {
+			Prometheus.$slider.find('ul').removeClass().addClass(Prometheus.transitions[Math.floor(Math.random() * (Prometheus.transitions.length))]);
+		}
+	});
 };
 
 /**
