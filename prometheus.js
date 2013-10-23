@@ -232,41 +232,18 @@ Prometheus = function($slider, options) {
 Prometheus.prototype.initScriptsFromSettings = function() {
 	var _this = this;
 
-	$.subscribe("beforeSlide", function() {
-		try {
-			_this.settings.beforeSlide().call();
-		} catch (e) {
-			$.each(_this.settings.beforeSlide, function(i) {
-				_this.settings.beforeSlide[i]();
-			});
-		}
-	});
-	$.subscribe("beforeTransition", function() {
-		try {
-			_this.settings.beforeTransition().call();
-		} catch (e) {
-			$.each(_this.settings.beforeTransition, function(i) {
-				_this.settings.beforeTransition[i]();
-			});
-		}
-	});
-	$.subscribe("afterTransition", function() {
-		try {
-			_this.settings.afterTransition().call();
-		} catch (e) {
-			$.each(_this.settings.afterTransition, function(i) {
-				_this.settings.afterTransition[i]();
-			});
-		}
-	});
-	$.subscribe("afterSlide", function() {
-		try {
-			_this.settings.afterSlide().call();
-		} catch (e) {
-			$.each(_this.settings.afterSlide, function(i) {
-				_this.settings.afterSlide[i]();
-			});
-		}
+	$.each(['beforeSlide','beforeTransition','afterTransition','afterSlide'],function() {
+		var __this = this.toString();
+
+		$.subscribe(__this, function() {
+			try {
+				_this.settings[__this]().call();
+			} catch (e) {
+				$.each(_this.settings[__this], function(i) {
+					_this.settings[__this][i]();
+				});
+			}
+		});
 	});
 };
 
