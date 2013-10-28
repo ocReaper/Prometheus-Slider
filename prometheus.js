@@ -203,7 +203,7 @@ $.fn.transition = function(way,settings,activeClass,image) {
  * @param {Object=} options An optional object of options to override the defaults
  * @constructor
  */
-Prometheus = function($slider, options) {
+var Prometheus = function($slider, options) {
 	var _this = this;
 
 	this.$slider = $slider;
@@ -312,7 +312,6 @@ Prometheus.prototype.getNextIndex = function(to) {
 
 /**
  * The default options of Prometheus
- * @type {{activeClass: string, slidesSelector: string, autoSlide: boolean, startDuration: number, duration: number, animation: {type: string, cols: number, rows: number, random: boolean, speed: number}, stopOnHover: boolean, directionNavigation: boolean, directionNavigationPrev: string, directionNavigationNext: string, controlNavigation: boolean, timerBar: boolean, keyboardNavigation: boolean, keyboardNavigationPrev: number, keyboardNavigationNext: number, mouseScrollNavigation: boolean, touchNavigation: boolean, init: Array, beforeSlide: Array, beforeTransition: Array, afterSlide: Array, afterTransition: Array}}
  */
 Prometheus.prototype.defaults = {
 	activeClass : 'active',
@@ -327,17 +326,17 @@ Prometheus.prototype.defaults = {
 	    random : true,
 		speed : 2000
 	},
-	stopOnHover : false,
-	directionNavigation : false,
+	StopOnHover : false,
+	DirectionNavigation : false,
 	directionNavigationPrev : '',
 	directionNavigationNext : '',
-	controlNavigation : false,
-	timerBar : false,
-	keyboardNavigation : false,
+	ControlNavigation : false,
+	TimerBar : false,
+	KeyboardNavigation : false,
 	keyboardNavigationPrev : 37,
 	keyboardNavigationNext : 39,
-	mouseScrollNavigation : false,
-	touchNavigation : false,
+	MouseScrollNavigation : false,
+	TouchNavigation : false,
 	beforeSlide : [],
 	beforeTransition : [],
 	afterTransition : [],
@@ -357,39 +356,56 @@ Prometheus.prototype.transitions = [
 	'googleNowCards'
 ];
 
+/**
+ * Initializer of Prometheus Slider
+ * @param {Object=} options
+ * @returns {*|jQuery}
+ * @constructor
+ */
 $.fn.Prometheus = function(options) {
 	return $(this).each(
 		function() {
-			var loadNecessaryPlugins = function() {
-				var i = 0;
-				while (i < modifiers.length) {
-					var modifier = modifiers[i];
+			var modifiers = [
+					'StopOnHover',
+					'DirectionNavigation',
+					'ControlNavigation',
+					'TimerBar',
+					'KeyboardNavigation',
+					'MouseScrollNavigation',
+					'TouchNavigation'
+				],
+				loadNecessaryPlugins = function(p) {
+					var i = 0;
+					while (i < modifiers.length) {
+						var modifier = modifiers[i];
 
-					if (modifier.indexOf(p.settings) && (p.settings[modifier] === true)) window[modifier](p);
-					i++;
-				}
-			},
-			modifiers = [
-				'stopOnHover',
-				'directionNavigation',
-				'controlNavigation',
-				'timerBar',
-				'keyboardNavigation',
-				'mouseScrollNavigation',
-				'touchNavigation'
-			],
-			p = new Prometheus($(this),options);
+//						console.log(p.settings);
+						if (modifier.indexOf(p.settings) && (p.settings[modifier] === true)) {
+							p = new PrometheusDecorators[modifier](p);
+						}
+						i++;
+					}
+				},
+				p = new Prometheus($(this),options);
 
-			initializeRandomTransitions(p);
-			loadNecessaryPlugins();
+			console.log(p.settings);
+//			var k = new PrometheusDecorators.InitializeRandomTransitions(p);
+			var k = new PrometheusDecorators.StopOnHover(p);
+			console.log(k.settings);
+//			loadNecessaryPlugins(p);
 		}
 	);
 };
 
+var PrometheusDecorators = {};
+
 /**
  * Creates random transitions
+ * @param {Object} Prometheus
+ * @constructor
  */
-initializeRandomTransitions = function(Prometheus) {
+PrometheusDecorators.InitializeRandomTransitions = function(Prometheus) {
+
 	Prometheus.randomizeTransition = false;
 
 	if (Prometheus.settings.animation.type === 'random') {
@@ -406,8 +422,10 @@ initializeRandomTransitions = function(Prometheus) {
 
 /**
  * Forces a slide for even the smallest swipe action
+ * @param {Object} Prometheus
+ * @constructor
  */
-touchNavigation = function(Prometheus) {
+PrometheusDecorators.TouchNavigation = function(Prometheus) {
 	var _this = Prometheus,
 		defaultPosition = (Prometheus.$slider.width() / 2),
 		currentPosition = defaultPosition,
@@ -428,8 +446,10 @@ touchNavigation = function(Prometheus) {
 
 /**
  * Listens to mouseWheel event and triggers slide adjusted to the event
+ * @param {Object} Prometheus
+ * @constructor
  */
-mouseScrollNavigation = function(Prometheus) {
+PrometheusDecorators.MouseScrollNavigation = function(Prometheus) {
 	var _this = Prometheus,
 		scrollInterspacer,
 		isFirefox = (/Firefox/i.test(navigator.userAgent)),
@@ -451,8 +471,10 @@ mouseScrollNavigation = function(Prometheus) {
 
 /**
  * Listens to keydown event and if the pressed key is the controll key it forces a slide
+ * @param {Object} Prometheus
+ * @constructor
  */
-keyboardNavigation = function(Prometheus) {
+PrometheusDecorators.KeyboardNavigation = function(Prometheus) {
 	var _this = Prometheus,
 		keydownInterspacer;
 
@@ -467,8 +489,10 @@ keyboardNavigation = function(Prometheus) {
 
 /**
  * Attaches a timer bar to the slider
+ * @param {Object} Prometheus
+ * @constructor
  */
-timerBar = function(Prometheus) {
+PrometheusDecorators.TimerBar = function(Prometheus) {
 	var _this = Prometheus,
 		resetBar = function() {
 			return function() {
@@ -498,8 +522,10 @@ timerBar = function(Prometheus) {
 
 /**
  * Initializes a controll navigation
+ * @param {Object} Prometheus
+ * @constructor
  */
-controlNavigation = function(Prometheus) {
+PrometheusDecorators.ControlNavigation = function(Prometheus) {
 	var _this = Prometheus,
 		createPaginationContainer = function() {
 			_this.$slider.append('<ul id="pagination"></ul>');
@@ -524,8 +550,10 @@ controlNavigation = function(Prometheus) {
 
 /**
  * Listens to the clicking event of the directionNavigation buttons
+ * @param {Object} Prometheus
+ * @constructor
  */
-directionNavigation = function(Prometheus) {
+PrometheusDecorators.DirectionNavigation = function(Prometheus) {
 	var _this = Prometheus;
 
 	Prometheus.settings.directionNavigationNext.unbind('click.slide').bind('click.slide', function() {
@@ -538,9 +566,11 @@ directionNavigation = function(Prometheus) {
 
 /**
  * Prevents autoSliding on hover
+ * @param {Object} Prometheus
+ * @constructor
  */
-stopOnHover = function(Prometheus) {
-	var _this = Prometheus;
+PrometheusDecorators.StopOnHover = function(Prometheus) {
+	var _this = this;
 
 	Prometheus.$slider.unbind('mouseenter.lockSlide').bind('mouseenter.lockSlide', function() {
 		_this.sliderLocked = true;
