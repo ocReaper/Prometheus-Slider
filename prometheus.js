@@ -48,6 +48,7 @@
 		var _this = this,
 			touchstartInterspacer,
 			touchmoveInterspacer;
+
 		this.el = element;
 		this.cbs = callbacks;
 		this.points = [0, 0];
@@ -329,16 +330,16 @@
 		    random : true,
 			speed : 2000
 		},
-		StopOnHover : false,
-		DirectionNavigation : false,
+		stopOnHover : false,
+		directionNavigation : false,
 		directionNavigationPrev : '',
 		directionNavigationNext : '',
-		ControlNavigation : false,
-		TimerBar : false,
-		KeyboardNavigation : false,
+		controlNavigation : false,
+		timerBar : false,
+		keyboardNavigation : false,
 		keyboardNavigationPrev : 37,
 		keyboardNavigationNext : 39,
-		MouseScrollNavigation : false,
+		mouseScrollNavigation : false,
 		touchNavigation : false,
 		beforeSlide : [],
 		beforeTransition : [],
