@@ -339,7 +339,7 @@
 		keyboardNavigationPrev : 37,
 		keyboardNavigationNext : 39,
 		MouseScrollNavigation : false,
-		TouchNavigation : false,
+		touchNavigation : false,
 		beforeSlide : [],
 		beforeTransition : [],
 		afterTransition : [],
@@ -369,13 +369,13 @@
 		return $(this).each(
 			function() {
 				var modifiers = [
-						'StopOnHover',
-						'DirectionNavigation',
-						'ControlNavigation',
-						'TimerBar',
-						'KeyboardNavigation',
-						'MouseScrollNavigation',
-						'TouchNavigation'
+						'stopOnHover',
+						'directionNavigation',
+						'controlNavigation',
+						'timerBar',
+						'keyboardNavigation',
+						'mouseScrollNavigation',
+						'touchNavigation'
 					],
 					loadNecessaryPlugins = function() {
 						var i = 0;
@@ -422,7 +422,7 @@
 	/**
 	 * Forces a slide for even the smallest swipe action
 	 */
-	PrometheusDecorators.TouchNavigation = function() {
+	PrometheusDecorators.touchNavigation = function() {
 		var _this = this,
 			defaultPosition = (_this.$slider.width() / 2),
 			currentPosition = defaultPosition,
@@ -444,7 +444,7 @@
 	/**
 	 * Listens to mouseWheel event and triggers slide adjusted to the event
 	 */
-	PrometheusDecorators.MouseScrollNavigation = function() {
+	PrometheusDecorators.mouseScrollNavigation = function() {
 		var _this = this,
 			scrollInterspacer,
 			isFirefox = (/Firefox/i.test(navigator.userAgent)),
@@ -467,7 +467,7 @@
 	/**
 	 * Listens to keydown event and if the pressed key is the controll key it forces a slide
 	 */
-	PrometheusDecorators.KeyboardNavigation = function() {
+	PrometheusDecorators.keyboardNavigation = function() {
 		var _this = this,
 			keydownInterspacer;
 
@@ -483,7 +483,7 @@
 	/**
 	 * Attaches a timer bar to the slider
 	 */
-	PrometheusDecorators.TimerBar = function() {
+	PrometheusDecorators.timerBar = function() {
 		var _this = this,
 			resetBar = function() {
 				return function() {
@@ -514,7 +514,7 @@
 	/**
 	 * Initializes a controll navigation
 	 */
-	PrometheusDecorators.ControlNavigation = function() {
+	PrometheusDecorators.controlNavigation = function() {
 		var _this = this,
 			createPaginationContainer = function() {
 				_this.$slider.append('<ul id="pagination"></ul>');
@@ -540,7 +540,7 @@
 	/**
 	 * Listens to the clicking event of the directionNavigation buttons
 	 */
-	PrometheusDecorators.DirectionNavigation = function() {
+	PrometheusDecorators.directionNavigation = function() {
 		var _this = this;
 
 		_this.settings.directionNavigationNext.unbind('click.slide').bind('click.slide', function() {
@@ -554,7 +554,7 @@
 	/**
 	 * Prevents autoSliding on hover
 	 */
-	PrometheusDecorators.StopOnHover = function() {
+	PrometheusDecorators.stopOnHover = function() {
 		var _this = this;
 
 		_this.$slider.unbind('mouseenter.lockSlide').bind('mouseenter.lockSlide', function() {
