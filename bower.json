@@ -1,0 +1,22 @@
+{
+  "name": "Prometheus-Slider",
+  "version": "0.0.0",
+  "homepage": "https://github.com/ocReaper/Prometheus-Slider",
+  "authors": [
+    "ocReaper <ocreaper@gmail.com>"
+  ],
+  "description": "A fully customizable jQuery Slider plugin with CSS3 based image transitions",
+  "keywords": [
+    "slider",
+    "jQuery",
+    "Slider",
+    "jQuery",
+    "Plugin",
+    "CSS3",
+    "customizable"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "~1"
+  }
+}
