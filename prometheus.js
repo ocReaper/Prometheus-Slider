@@ -44,27 +44,37 @@
 		return this;
 	};
 
-	var TouchHandler = function(element, callbacks) {
+	/**
+	 * The core of touch handling
+	 * @param {Prometheus} prometheus
+	 * @constructor
+	 */
+	var TouchHandler = function(prometheus) {
 		var _this = this,
 			touchstartInterspacer,
 			touchmoveInterspacer;
 
-		this.el = element;
-		this.cbs = callbacks;
+		this.prometheus = prometheus;
+		this.defaultPosition = (this.prometheus.$slider.width() / 2);
+		this.currentPosition = this.defaultPosition;
 		this.points = [0, 0];
 
-		this.el.addEventListener('touchstart', function(e) {
+		this.prometheus.$slider.on('touchstart', function(e) {
 			touchstartInterspacer && clearTimeout(touchstartInterspacer);
 		    touchstartInterspacer = setTimeout(function() {
-				_this.start(e);
+				var event = e.originalEvent;
+
+			    _this.start(event);
 	        }, 200);
 		});
 
-		this.el.addEventListener('touchmove', function(e) {
+		this.prometheus.$slider.on('touchmove', function(e) {
 			touchmoveInterspacer && clearTimeout(touchmoveInterspacer);
 	        touchmoveInterspacer = setTimeout(function() {
-				e.preventDefault();
-				_this.move(e);
+		        var event = e.originalEvent;
+
+				event.preventDefault();
+				_this.move(event);
 			}, 200);
 		});
 	};
@@ -95,24 +105,19 @@
 			} else {
 				this.points[1] = e.targetTouches[0].pageX;
 			}
-			this.cbs.swiping(this.diff());
+			this.swiping(this.diff());
 			this.points[0] = this.points[1];
 		}
 	};
 
-	$.fn.touchHandler = function(callbacks) {
-		if (typeof callbacks.swiping !== 'function') {
-			throw '"swiping" callback must be defined.';
+	TouchHandler.prototype.swiping = function(displacement) {
+		this.currentPosition += displacement;
+		if (this.currentPosition > (this.defaultPosition)) {
+			this.prometheus.slide(-1,true);
+		} else if (this.currentPosition < this.defaultPosition) {
+			this.prometheus.slide(1,true);
 		}
-
-		return this.each(function() {
-			var _this = $(this),
-				touchHandler = _this.data('touchHandler');
-
-			if (!touchHandler) {
-				_this.data('touchHandler', (touchHandler = new TouchHandler(this, callbacks)));
-			}
-		});
+		this.currentPosition = this.defaultPosition;
 	};
 
 	/**
@@ -424,22 +429,7 @@
 	 * Forces a slide for even the smallest swipe action
 	 */
 	PrometheusDecorators.touchNavigation = function() {
-		var _this = this,
-			defaultPosition = (_this.$slider.width() / 2),
-			currentPosition = defaultPosition,
-			cb = {
-				swiping: function(displacement) {
-					currentPosition += displacement;
-					if (currentPosition > (defaultPosition)) {
-						_this.slide(-1,true);
-					} else if (currentPosition < defaultPosition) {
-						_this.slide(1,true);
-					}
-					currentPosition = defaultPosition;
-				}
-			};
-
-		_this.$slider.touchHandler(cb);
+		new TouchHandler(this);
 	};
 
 	/**
