@@ -117,6 +117,10 @@ The default is `false`.
 Defines whether the slider can be controlled by touch events or not.
 The default is `false`.
 
+### parallaxEffecting *{boolean}*
+Defines whether the slides of the slider has a smooth moving effect by mouse move or device gyroscope.
+The default is `false`.
+
 ### beforeSlide *{anonymous function or array of anonymous functions}*
 You can add an `anonymous function` or an array of `anonymous functions` here which will be triggered before the slide event.
 The default is `[]`.
