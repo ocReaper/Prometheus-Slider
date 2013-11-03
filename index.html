@@ -9,11 +9,12 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$('#slider').Prometheus({
-				autoSlide : false,
+				startDuration : 10000,
+				duration : 6000,
 				animation : {
-					type : 'random',
-				    cols : 7,
-				    rows : 2
+					type : 'fade',
+				    cols : 5,
+				    rows : 3
 				},
 				directionNavigation : true,
 				directionNavigationPrev : $('#prev'),
@@ -27,31 +28,69 @@
 			});
 		});
 	</script>
+	<style>
+		body {
+			background: #B1947C;
+		}
+		.title {
+			position:absolute;
+			top: 0;
+			left: 0;
+			z-index: 2;
+		}
+		#slider {
+			overflow: visible;
+		}
+		#slider > ul {
+			overflow: hidden;
+		}
+		#pagination {
+			bottom: -30px !important;
+			height: 20px !important;
+		}
+	</style>
 </head>
 <body>
 	<div id="slider">
 		<ul class="slides">
 			<li>
-				<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" style="left: -65px;position: relative;">
+				<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="400" style="left: -65px;position: absolute;z-index: 1;">
 					<g>
-						<path stroke="#999999" id="svg_8" d="m353.42749,256.767151l72,-126.001526l72,126.001526l-144,0z" stroke-width="1.5" fill="#56aaff" data-role="parallaxed"/>
-						<path stroke="#999999" id="svg_6" d="m262.142487,230.958908l84.500122,-147.873276l84.499847,147.873276l-168.999969,0z" stroke-width="1.5" fill="#c18bf9" data-role="parallaxed"/>
-						<path id="svg_10" d="m485.092529,173.780609l69.14209,-120.999985l69.142151,120.999985l-138.284241,0z" stroke-width="1.5" stroke="#999999" fill="#56aaff" data-role="parallaxed"/>
-						<path stroke="#999999" id="svg_9" d="m431.232483,110.496887l56.499817,-98.875969l56.500183,98.875969l-113,0z" stroke-width="1.5" fill="#c18bf9" data-role="parallaxed"/>
-						<path stroke="#999999" transform="rotate(-180 423.75 108.997)" transform-origin="50% 50%" id="svg_7" d="m362.75,162.372055l61.000092,-106.751068l60.999908,106.751068l-122,0z" stroke-opacity="null" stroke-width="1.5" fill="#e5e5e5" data-role="parallaxed"/>
-						<path stroke="#999999" transform="rotate(-180 205 193.926)" transform-origin="50% 50%" id="svg_5" d="m2.000015,371.550323l203.000275,-355.24958l202.99971,355.24958l-405.999985,0z" stroke-width="1.5" fill="#56aaff" data-role="parallaxed"/>
-						<path stroke="#999999" id="svg_11" d="m560.54248,228.255722l17.71405,-31.000107l17.714905,31.000107l-35.428955,0z" stroke-width="1.5" fill="#c18bf9" data-role="parallaxed"/>
-						<path transform="rotate(-180 626.703 52.0002)" transform-origin="50% 50%" id="svg_12" d="m596.702515,78.250435l30,-52.500435l30,52.500435l-60,0z" stroke-width="1.5" stroke="#999999" fill="#c18bf9" data-role="parallaxed"/>
-						<path stroke="#999999" transform="rotate(-180 697.203 122.188)" transform-origin="50% 50%" id="svg_13" d="m672.702515,143.625351l24.5,-42.875351l24.5,42.875351l-49,0z" stroke-width="1.5" fill="#e5e5e5" data-role="parallaxed"/>
-						<path id="svg_14" d="m741.342529,55.375954l15.5,-27.125328l15.5,27.125328l-31,0z" stroke-width="1.5" stroke="#999999" fill="#56aaff" data-role="parallaxed"/>
+						<path id="svg_8" d="m353.42749,256.767151l72,-126.001526l72,126.001526l-144,0z" fill="#a06641" data-role="parallaxed"/>
+						<path id="svg_6" d="m262.142487,230.958908l84.500122,-147.873276l84.499847,147.873276l-168.999969,0z" fill="#5d2422" data-role="parallaxed"/>
+						<path id="svg_10" d="m485.092529,173.780609l69.14209,-120.999985l69.142151,120.999985l-138.284241,0z" fill="#a06641" data-role="parallaxed"/>
+						<path id="svg_9" d="m431.232483,110.496887l56.499817,-98.875969l56.500183,98.875969l-113,0z" fill="#5d2422" data-role="parallaxed"/>
+						<path transform="rotate(-180 423.75 108.997)" transform-origin="50% 50%" id="svg_7" d="m362.75,162.372055l61.000092,-106.751068l60.999908,106.751068l-122,0z" fill="#8a422a" data-role="parallaxed"/>
+						<path transform="rotate(-180 205 193.926)" transform-origin="50% 50%" id="svg_5" d="m2.000015,371.550323l203.000275,-355.24958l202.99971,355.24958l-405.999985,0z" fill="#a06641" data-role="parallaxed"/>
+						<path id="svg_11" d="m560.54248,228.255722l17.71405,-31.000107l17.714905,31.000107l-35.428955,0z" stroke-width="1.5" fill="#8a422a" data-role="parallaxed"/>
+						<path transform="rotate(-180 626.703 52.0002)" transform-origin="50% 50%" id="svg_12" d="m596.702515,78.250435l30,-52.500435l30,52.500435l-60,0z" fill="#5d2422" data-role="parallaxed"/>
+						<path transform="rotate(-180 697.203 122.188)" transform-origin="50% 50%" id="svg_13" d="m672.702515,143.625351l24.5,-42.875351l24.5,42.875351l-49,0z" fill="#8a422a" data-role="parallaxed"/>
+						<path id="svg_14" d="m741.342529,55.375954l15.5,-27.125328l15.5,27.125328l-31,0z" fill="#a06641" data-role="parallaxed"/>
 					</g>
 				</svg>
+				<img src="assets/parallax.jpg" alt="" data-role="background"/>
+				<img class="title" src="assets/prometheus_title_2.png" alt="" data-role="parallaxed"/>
 			</li>
-			<li>
-				<img src="assets/slide1.jpg" alt=""/>
+			<li data-animation="fade">
+				<img src="assets/cubes1.jpg" alt="" data-role="background"/>
 			</li>
-			<li>
-				<img src="assets/slide2.jpg" alt="" data-role="parallaxed"/>
+			<li data-animation="slide">
+				<img src="assets/cubes2.jpg" alt="" data-role="background"/>
+			</li>
+			<li data-animation="blocks">
+				<img src="assets/cubes3.jpg" alt="" data-role="background"/>
+			</li>
+			<li data-animation="blocksZoom">
+				<img src="assets/cubes4.jpg" alt="" data-role="background"/>
+			</li>
+			<li data-animation="dots">
+				<img src="assets/cubes5.jpg" alt="" data-role="background"/>
+			</li>
+			<li data-animation="googleNowCards">
+				<img src="assets/cubes6.jpg" alt="" data-role="background"/>
+			</li>
+			<li data-animation="fade">
+				<img src="assets/circles1.jpg" alt="" data-role="background"/>
 			</li>
 		</ul>
 		<div id="next" class="direction next"></div>

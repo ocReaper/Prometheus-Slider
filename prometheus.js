@@ -352,20 +352,23 @@
 	 * Replaces every <img/> tag to a <div/> with a background image
 	 */
 	Prometheus.prototype.turnImagesIntoContainers = function() {
-		var _this = this;
+		var _this = this,
+			i = 0;
 
 		this.images = [];
 
 		this.$slides.each(function() {
-			var $this = $(this),
-				$img = $this.find('img'),
+			var $slide = $(this),
+				$img = $slide.find('img[data-role=background]'),
 				$tiles = $('<div class="tiles"></div>');
-
+				
+			if (!$img.length) return;
 			$img.hide();
-			$this.append($tiles);
+			$slide.append($tiles);
 			$tiles.css('background-image', 'url(' + $img.attr('src') + ')');
 			if ($img.data()) $tiles.data($img.data());
-			_this.images.push($tiles.css('background-image'));
+			if (!!$img.attr('class')) $tiles.addClass($img.attr('class'))
+			_this.images[i] = $tiles.css('background-image');
 			$img.remove();
 		});
 	};
@@ -385,6 +388,9 @@
 			var $currentSlide = this.$slides.eq(this.currentPos),
 				$nextSlide = this.$slides.eq(nextPos);
 
+			if ($nextSlide.data('animation')) this.$slider.find('ul').removeClass().addClass($nextSlide.data('animation'));
+			else this.$slider.find('ul').removeClass().addClass(this.settings.animation.type);
+			
 			$.publish('beforeTransition', nextPos);
 
 			$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
