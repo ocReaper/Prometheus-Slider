@@ -134,32 +134,51 @@
 		this.prometheus = prometheus;
 		this.isGyroscopic = false;
 		this.orientationSupport = !!window.DeviceOrientationEvent;
+		this.$parallaxables = undefined;
 
-		this.prometheus.$slides.each(function(){
-			$(this).css({'left':'10%','top':'10%','transform':'translate3d(-10%,-10%,0)'})
+		this.bindParallaxToCurrentSlide = function() {
+			return function() {
+				_this.$parallaxables = _this.prometheus.$slides.eq(_this.prometheus.currentPos).find('*').filter(function() {
+					return $(this).data("role") === 'parallaxed'
+				});
+
+				if (_this.$parallaxables.length <= 0) return;
+
+				if (_this.orientationSupport && $.browser.mobile) {
+					_this.isGyroscopic = true;
+
+					$(window).on('orientationchange',function(e) {
+						var event = e.originalEvent,
+							x = event.beta,
+							y = event.gamma;
+
+						_this.positionCalculator(x,y);
+						_this.setPosition(_this.prometheus.$slides.eq(_this.prometheus.currentPos));
+					});
+				} else {
+					_this.prometheus.$slider.on('mousemove',function(e) {
+						var event = e.originalEvent,
+							x = event.clientX,
+							y = event.clientY;
+
+						_this.positionCalculator(x,y);
+						_this.setPosition(_this.$parallaxables);
+					});
+				}
+			}
+		};
+
+		this.bindParallaxToCurrentSlide().call();
+		$.subscribe('afterSlide',this.bindParallaxToCurrentSlide());
+
+		$.subscribe('beforeSlide',function() {
+			if (_this.orientationSupport && $.browser.mobile) {
+				$(window).off('orientationchange');
+			} else {
+				_this.prometheus.$slider.off('mousemove');
+			}
+			_this.$parallaxables.css('transform','translate3d(0,0,0)');
 		});
-
-		if (this.orientationSupport && $.browser.mobile) {
-			this.isGyroscopic = true;
-
-			$(window).on('orientationchange',function(e) {
-				var event = e.originalEvent,
-					x = event.beta,
-					y = event.gamma;
-
-				_this.positionCalculator(x,y);
-				_this.setPosition(_this.prometheus.$slides.eq(_this.prometheus.currentPos));
-			});
-		} else {
-			this.prometheus.$slider.on('mousemove',function(e) {
-				var event = e.originalEvent,
-					x = event.clientX,
-					y = event.clientY;
-
-				_this.positionCalculator(x,y);
-				_this.setPosition(_this.prometheus.$slides.eq(_this.prometheus.currentPos));
-			});
-		}
 	};
 
 	ParallaxHandler.prototype.positionCalculator = function(x,y) {
@@ -169,22 +188,27 @@
 		if (this.isGyroscopic) {
 			x = Math.abs(x + 10) * -1;
 			y = Math.abs(y - 80) * -1;
-			x = (x / 6.5);
-			y = (y / 6.5);
-			this.x = x + '%';
-			this.y = y + '%';
 		} else {
 			x = ((x * 100) / sliderWidth) * -1;
 			y = ((y * 100) / sliderHeight) * -1;
-			x = (x / 6.5);
-			y = (y / 6.5);
-			this.x = x + '%';
-			this.y = y + '%';
 		}
+		x = (x / 6.4) + 10;
+		y = (y / 5) + 10;
+		this.x = x + '%';
+		this.y = y + '%';
 	};
 
 	ParallaxHandler.prototype.setPosition = function(element) {
-		element.css('transform', 'translate3d(' + this.x + ',' + this.y + ',0)');
+		var _this = this;
+
+		element.each(function(){
+			var $this = $(this),
+				rotate = (!!$this.attr('transform')) ? $this.attr('transform').replace(/rotate\((.*)\)/,'$1').split(' ')[0] : 0;
+
+			$this.css({
+				'transform': 'translate3d(' + _this.x + ',' + _this.y + ',0) rotate(' + rotate + 'deg)'
+			});
+		});
 	};
 
 	/**
@@ -293,11 +317,14 @@
 
 		if (this.$slider.data('initialized')) return;
 		this.$slider.data('initialized', true);
+		this.$slides.eq(0).addClass(this.settings.activeClass);
 
 		this.turnImagesIntoContainers();
 		this.initScriptsFromSettings();
 
-		this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
+		if (this.settings.autoSlide) {
+			this.timer = setTimeout(function(){ _this.slide(1); }, this.settings.startDuration);
+		}
 	};
 
 	/**
@@ -337,6 +364,7 @@
 			$img.hide();
 			$this.append($tiles);
 			$tiles.css('background-image', 'url(' + $img.attr('src') + ')');
+			if ($img.data()) $tiles.data($img.data());
 			_this.images.push($tiles.css('background-image'));
 			$img.remove();
 		});
@@ -393,7 +421,7 @@
 		activeClass : 'active',
 		slidesSelector : "li",
 		autoSlide : true,
-		startDuration : 0,
+		startDuration : 5000,
 		duration : 3000,
 		animation : {
 			type : 'fade',
@@ -601,6 +629,7 @@
 
 		createPaginationContainer();
 		createBulletsForPagination();
+		$('#pagination').find('li').eq(0).addClass(_this.settings.activeClass);
 		$.subscribe('afterTransition', animatePaginationBullets());
 	};
 
