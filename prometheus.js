@@ -147,13 +147,13 @@
 				if (_this.orientationSupport && $.browser.mobile) {
 					_this.isGyroscopic = true;
 
-					$(window).on('orientationchange',function(e) {
+					$(window).on('deviceorientation',function(e) {
 						var event = e.originalEvent,
 							x = event.beta,
 							y = event.gamma;
 
 						_this.positionCalculator(x,y);
-						_this.setPosition(_this.prometheus.$slides.eq(_this.prometheus.currentPos));
+						_this.setPosition(_this.$parallaxables);
 					});
 				} else {
 					_this.prometheus.$slider.on('mousemove',function(e) {
@@ -173,7 +173,7 @@
 
 		$.subscribe('beforeSlide',function() {
 			if (_this.orientationSupport && $.browser.mobile) {
-				$(window).off('orientationchange');
+				$(window).off('deviceorientation');
 			} else {
 				_this.prometheus.$slider.off('mousemove');
 			}
