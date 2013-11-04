@@ -265,26 +265,27 @@
 					tileSpeed = settings.speed / n_tiles,
 					animateTilesWithDelay = function() {
 						tilesArr.forEach(function(tile, i) {
-							$tiles.eq(tile).css3({'transition-delay':((i*tileSpeed)/1000)+'s'});
+							$tiles.eq(tile).css3({'transition-delay':((i*tileSpeed)/1000)+'s'}).addClass('animate');
 						});
 					};
 
 				switch (way) {
 					case 'out':
-						$tiles.css3({transition:'none'});
-						$container.removeClass(activeClass);
-						$img.css('background-image',imageBackground);
-					break;
-					case 'in':
+//						$tiles.css3({transition:'none'});
+//						$container.removeClass(activeClass);
+//						$img.css('background-image',imageBackground);
+//						$tiles.css3({
+//							'transition-property' : 'all',
+//							'transition-duration' : '.3s',
+//							'transition-timing-function' : 'cubic-bezier(0.390, 0.575, 0.565, 1.000)'
+//						});
+						createTilesByImage();
 						$img.css('background-image','');
-						$tiles.css3({
-							'transition-property' : 'all',
-							'transition-duration' : '.3s',
-							'transition-timing-function' : 'cubic-bezier(0.390, 0.575, 0.565, 1.000)'
-						});
 						animateTilesWithDelay();
-						$container.addClass(activeClass);
-						break;
+					break;
+//					case 'in':
+//						$container.addClass(activeClass);
+//					break;
 				}
 			},
 			checkInitialization = function() {
@@ -293,7 +294,7 @@
 				} else createTilesByImage();
 			};
 
-		checkInitialization();
+//		checkInitialization();
 		doAnimationWithTheCreatedTiles();
 	};
 
@@ -312,12 +313,14 @@
 		this.$slides = this.$slider.find(this.settings.slidesSelector);
 		this.sliderLocked = false;
 		this.timer = undefined;
+		this.transitionEndTimer = undefined;
 	    this.totalImages = (this.$slides.length);
 	    this.currentPos = 0;
 
 		if (this.$slider.data('initialized')) return;
 		this.$slider.data('initialized', true);
 		this.$slides.eq(0).addClass(this.settings.activeClass);
+		this.$slides.eq(1).addClass('preparator');
 
 		this.turnImagesIntoContainers();
 		this.initScriptsFromSettings();
@@ -362,14 +365,20 @@
 				$img = $slide.find('img[data-role=background]'),
 				$tiles = $('<div class="tiles"></div>');
 				
-			if (!$img.length) return;
+			if (!$img.length) {
+				_this.images[i] = '';
+				i++;
+				return;
+			}
+
 			$img.hide();
 			$slide.append($tiles);
 			$tiles.css('background-image', 'url(' + $img.attr('src') + ')');
 			if ($img.data()) $tiles.data($img.data());
-			if (!!$img.attr('class')) $tiles.addClass($img.attr('class'))
+			if (!!$img.attr('class')) $tiles.addClass($img.attr('class'));
 			_this.images[i] = $tiles.css('background-image');
 			$img.remove();
+			i++;
 		});
 	};
 
@@ -380,23 +389,34 @@
 	 */
 	Prometheus.prototype.slide = function(direction, forceSlide) {
 		var _this = this,
+			currentPos = this.currentPos,
 			nextPos = this.getNextIndex(direction);
 
 		$.publish('beforeSlide', nextPos);
 
 		if (!this.sliderLocked || forceSlide) {
-			var $currentSlide = this.$slides.eq(this.currentPos),
+			var $currentSlide = this.$slides.eq(currentPos),
 				$nextSlide = this.$slides.eq(nextPos);
 
 			if ($nextSlide.data('animation')) this.$slider.find('ul').removeClass().addClass($nextSlide.data('animation'));
 			else this.$slider.find('ul').removeClass().addClass(this.settings.animation.type);
-			
+
+			$currentSlide.removeClass('preparator');
+			$nextSlide.addClass('preparator');
 			$.publish('beforeTransition', nextPos);
 
 			$currentSlide.transition('out',this.settings.animation,this.settings.activeClass,this.images[this.currentPos]);
-			$nextSlide.transition('in',this.settings.animation,this.settings.activeClass);
 
-			$.publish('afterTransition', nextPos);
+
+			if (this.transitionEndTimer) clearTimeout(this.transitionEndTimer);
+		    this.transitionEndTimer = setTimeout(function(){
+				$currentSlide.removeClass(_this.settings.activeClass);
+				$currentSlide.find('.tiles').css('background-image',_this.images[currentPos]);
+			    $currentSlide.find('.tile').remove();
+				$nextSlide.addClass(_this.settings.activeClass);
+			    $nextSlide.removeClass('preparator');
+				$.publish('afterTransition', nextPos);
+		    }, (this.settings.animation.speed + 180));
 
 			this.currentPos = nextPos;
 		}
