@@ -253,6 +253,7 @@
 				});
 				$tiles.each(function() {
 					var pos = $(this).position();
+
 					$(this).css('backgroundPosition', -pos.left + 'px ' + -pos.top + 'px').css3({
 						'transition-property' : 'all',
 						'transition-duration' : '.3s',
@@ -260,42 +261,18 @@
 					});
 				});
 			},
-			doAnimationWithTheCreatedTiles = function() {
+			animateTilesWithDelay = function() {
 				var tilesArr = range(0, n_tiles, settings.random),
-					tileSpeed = settings.speed / n_tiles,
-					animateTilesWithDelay = function() {
-						tilesArr.forEach(function(tile, i) {
-							$tiles.eq(tile).css3({'transition-delay':((i*tileSpeed)/1000)+'s'}).addClass('animate');
-						});
-					};
+					tileSpeed = settings.speed / n_tiles;
 
-				switch (way) {
-					case 'out':
-//						$tiles.css3({transition:'none'});
-//						$container.removeClass(activeClass);
-//						$img.css('background-image',imageBackground);
-//						$tiles.css3({
-//							'transition-property' : 'all',
-//							'transition-duration' : '.3s',
-//							'transition-timing-function' : 'cubic-bezier(0.390, 0.575, 0.565, 1.000)'
-//						});
-						createTilesByImage();
-						$img.css('background-image','');
-						animateTilesWithDelay();
-					break;
-//					case 'in':
-//						$container.addClass(activeClass);
-//					break;
-				}
-			},
-			checkInitialization = function() {
-				if (initialized) {
-					$tiles = $img.find('.tile');
-				} else createTilesByImage();
+				tilesArr.forEach(function(tile, i) {
+					$tiles.eq(tile).css3({'transition-delay':((i*tileSpeed)/1000)+'s'}).addClass('animate');
+				});
 			};
 
-//		checkInitialization();
-		doAnimationWithTheCreatedTiles();
+		createTilesByImage();
+		$img.css('background-image','');
+		animateTilesWithDelay();
 	};
 
 	/**
