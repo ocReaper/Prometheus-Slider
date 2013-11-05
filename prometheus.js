@@ -243,7 +243,6 @@
 					tiles.push('<div class="tile"></div>');
 				}
 				$tiles = $(tiles.join(''));
-				$img.append($tiles);
 				$tiles.css({
 					width: width / settings.cols,
 					height: height / settings.rows,
@@ -251,14 +250,16 @@
 				}).css3({
 					transition : 'none'
 				});
+				$img.append($tiles);
 				$tiles.each(function() {
 					var pos = $(this).position();
 
-					$(this).css('backgroundPosition', -pos.left + 'px ' + -pos.top + 'px').css3({
-						'transition-property' : 'all',
-						'transition-duration' : '.3s',
-						'transition-timing-function' : 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
-					});
+					$(this).css('backgroundPosition', -pos.left + 'px ' + -pos.top + 'px');
+				});
+				$tiles.css3({
+					'transition-property' : 'all',
+					'transition-duration' : '.3s',
+					'transition-timing-function' : 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
 				});
 			},
 			animateTilesWithDelay = function() {
