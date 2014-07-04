@@ -29,8 +29,8 @@
         }
       };
 
-    _this.$slider.append('<div id="timerBar"></div>');
-    _this.$timerBar = _this.$slider.find('#timerBar');
+    this.$slider.append('<div id="timerBar"></div>');
+    this.$timerBar = this.$slider.find('#timerBar');
 
     $.subscribe('beforeSlide', resetBar());
     $.subscribe('afterSlide', animateBar());

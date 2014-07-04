@@ -9,14 +9,12 @@
 
   /**
    * This function provides the tile creation and the transition handling as the name says
-   * @param {string} way The way of the transition (= in/out)
-   * @param {Object} settings The animation perferences given by this.settings.animation
-   * @param {string} activeClass The activeClass from this.settings
-   * @param {string} image The url of the image get by jQuery like "url(http://domain.com/assets/slide1.jpg)"
    */
-  $.fn.transition = function (way, settings, activeClass, image) {
+  ImageSlice.transition = function (e,args) {
 
-    var $container = $(this),
+    var $container = args[0],
+      settings = this.settings,
+      image = this.images[args[1]],
       width = $container.width(),
       height = $container.height(),
       $img = $container.find('.tiles'),
@@ -111,6 +109,7 @@
 
   PrometheusDecorators.imageSlice = function(){
     $.subscribe('preInit', ImageSlice.turnImagesIntoContainers());
+    $.subscribe('onTransition', ImageSlice.transition());
     $.subscribe('afterTransition', function(){
       $currentSlide.find('.tiles').css('background-image', _this.images[currentPos]);
       $currentSlide.find('.tile').remove();

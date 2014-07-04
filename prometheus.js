@@ -1,14 +1,6 @@
 ;(function (window, $, undefined) {
   "use strict";
 
-  $.fn.transition = function () {
-    $(this).css3({
-      'transition-property': 'all',
-      'transition-duration': '.3s',
-      'transition-timing-function': 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
-    });
-  };
-
   /**
    * Creator of magic, constructor of Prometheus
    * @param {Object} $slider Requires a jQuery node
@@ -35,6 +27,11 @@
 
     $.publish('preInit');
     this.initScriptsFromSettings();
+    this.$slides.css3({
+      'transition-property': 'all',
+      'transition-duration': (this.settings.animation.speed / 1000) + 's',
+      'transition-timing-function': 'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
+    });
 
     if (this.settings.autoSlide) {
       this.timer = setTimeout(function () {
@@ -87,7 +84,7 @@
       $nextSlide.addClass('preparator');
       $.publish('beforeTransition', nextPos);
 
-      $currentSlide.transition();
+      $.publish('onTransition', [$currentSlide,currentPos]);
 
       if (this.transitionEndTimer) clearTimeout(this.transitionEndTimer);
       this.transitionEndTimer = setTimeout(function () {
@@ -132,8 +129,6 @@
     duration: 3000,
     animation: {
       type: 'fade',
-      cols: 7,
-      rows: 2,
       random: true,
       speed: 2000
     },
@@ -152,7 +147,8 @@
     beforeSlide: [],
     beforeTransition: [],
     afterTransition: [],
-    afterSlide: []
+    afterSlide: [],
+    imageSlice: true
   };
 
   /**
@@ -185,6 +181,7 @@
             'keyboardNavigation',
             'mouseScrollNavigation',
             'touchNavigation',
+            'imageSlice',
             'parallaxEffecting'
           ],
           loadNecessaryPlugins = function () {
