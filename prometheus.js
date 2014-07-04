@@ -147,8 +147,7 @@
     beforeSlide: [],
     beforeTransition: [],
     afterTransition: [],
-    afterSlide: [],
-    imageSlice: true
+    afterSlide: []
   };
 
   /**
@@ -181,7 +180,6 @@
             'keyboardNavigation',
             'mouseScrollNavigation',
             'touchNavigation',
-            'imageSlice',
             'parallaxEffecting'
           ],
           loadNecessaryPlugins = function () {
