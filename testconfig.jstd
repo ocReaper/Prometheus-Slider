@@ -1,5 +1,7 @@
 load:
-  - jquery-1.9.0.min.js
+  - bower_components/jquery/dist/jquery.min.js
+  - helpers/*.js
+  - addons/*.js
   - prometheus.js
 
 test:
